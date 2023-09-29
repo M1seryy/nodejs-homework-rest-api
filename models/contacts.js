@@ -1,26 +1,23 @@
 const fs = require("fs/promises");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const listContacts = async () => {
   return await fs.readFile(`${__dirname}/contacts.json`, "utf-8");
 };
 
-
-
 const getContactById = async (contactId) => {
   const db = await fs
     .readFile(`${__dirname}/contacts.json`, "utf-8")
-    .then((data) => data)
+    .then((data) => JSON.parse(data))
     .catch((err) => console.log(err));
-  const isContactInDb = JSON.parse(db).filter((item) => item.id === contactId);
+  const isContactInDb = db.filter((item) => item.id === contactId);
 
-  const [getById] = JSON.parse(db).filter((item) => item.id === contactId);
+  const [getById] = isContactInDb;
   if (isContactInDb.length !== 0) {
     return getById;
   }
   return "Not found such a contact";
 };
-
-
 
 const removeContact = async (contactId) => {
   const db = await fs
@@ -48,7 +45,7 @@ const addContact = async (body) => {
     .catch((err) => err);
   if (body.name && body.phone && body.email) {
     const newContact = {
-      id: Math.random().toString(),
+      id: uuidv4(),
       name: body.name,
       email: body.email,
       phone: body.phone,

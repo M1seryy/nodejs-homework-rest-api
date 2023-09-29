@@ -25,10 +25,15 @@ router.get("/:contactId", async (req, res) => {
 router.post("/", async (req, res, next) => {
   const { name, phone, email } = req.body;
   const newContact = await addContact({ name, phone, email });
-
-  res.status(200).json({
-    data: newContact,
-  });
+  if (!name || !email || !phone) {
+    return res.status(400).json({
+      message: "Fields error",
+    });
+  } else {
+    res.status(200).json({
+      data: newContact,
+    });
+  }
 });
 
 router.delete("/:contactId", async (req, res, next) => {
