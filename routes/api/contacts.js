@@ -15,7 +15,7 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
+  const { contactId } = req.params
   const response = await getContactById(contactId);
   res.status(200).json({
     data: response,
