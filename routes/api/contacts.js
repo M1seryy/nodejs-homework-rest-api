@@ -1,4 +1,5 @@
 const express = require("express");
+const controller = require("../../models/controllers");
 const {
   listContacts,
   getContactById,
@@ -8,14 +9,15 @@ const {
 } = require("../../models/contacts");
 
 const router = express.Router();
-router.get("/", async (req, res, next) => {
-  listContacts()
-    .then((data) => res.json({ data: JSON.parse(data) }))
-    .catch((err) => console.log(err));
-});
+router.get("/", controller.get);
+// router.get("/", async (req, res, next) => {
+//   listContacts()
+//     .then((data) => res.json({ data: JSON.parse(data) }))
+//     .catch((err) => console.log(err));
+// });
 
 router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params
+  const { contactId } = req.params;
   const response = await getContactById(contactId);
   res.status(200).json({
     data: response,

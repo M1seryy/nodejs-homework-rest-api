@@ -1,10 +1,9 @@
 const fs = require("fs/promises");
 const path = require("path");
+
 const listContacts = async () => {
   return await fs.readFile(`${__dirname}/contacts.json`, "utf-8");
 };
-
-
 
 const getContactById = async (contactId) => {
   const db = await fs
@@ -19,8 +18,6 @@ const getContactById = async (contactId) => {
   }
   return "Not found such a contact";
 };
-
-
 
 const removeContact = async (contactId) => {
   const db = await fs
