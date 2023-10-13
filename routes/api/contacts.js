@@ -10,19 +10,8 @@ const {
 
 const router = express.Router();
 router.get("/", controller.get);
-// router.get("/", async (req, res, next) => {
-//   listContacts()
-//     .then((data) => res.json({ data: JSON.parse(data) }))
-//     .catch((err) => console.log(err));
-// });
 
-router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
-  const response = await getContactById(contactId);
-  res.status(200).json({
-    data: response,
-  });
-});
+router.get("/:contactId", controller.getById);
 
 router.post("/", async (req, res, next) => {
   const { name, phone, email } = req.body;
