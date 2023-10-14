@@ -1,57 +1,16 @@
 const express = require("express");
 const controller = require("../../models/controllers");
-const {
-  listContacts,
-  getContactById,
-  addContact,
-  removeContact,
-  updateContact,
-} = require("../../models/contacts");
+
 
 const router = express.Router();
 router.get("/", controller.get);
 
 router.get("/:contactId", controller.getById);
 
-router.post("/", async (req, res, next) => {
-  const { name, phone, email } = req.body;
-  const newContact = await addContact({ name, phone, email });
-  if (!name || !email || !phone) {
-    return res.status(400).json({
-      message: "Fields error",
-    });
-  } else {
-    res.status(200).json({
-      data: newContact,
-    });
-  }
-});
+router.post("/", controller.create);
 
-router.delete("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  await removeContact(contactId);
-  const result = await removeContact(contactId);
-  res.status(204).json({
-    data: result,
-  });
-});
+router.delete("/:contactId", controller.remove);
 
-router.put("/:contactId", async (req, res, next) => {
-  const { name, phone, email } = req.body;
-  const { contactId } = req.params;
-  console.log("req.body", req.body);
-  console.log("contactId", contactId);
-  if (Object.keys(req.body).length) {
-    res.json({
-      status: "success",
-      code: 200,
-      data: await updateContact(contactId, { name, phone, email }),
-    });
-  } else {
-    res.status(400).json({
-      message: "not found",
-    });
-  }
-});
+router.put("/:contactId", controller.updateStatus);
 
 module.exports = router;

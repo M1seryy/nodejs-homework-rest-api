@@ -10,7 +10,22 @@ const getTaskById = async (id) => {
   return byId;
 };
 
+const createTask = ({ name, email, phone }) => {
+  return contacts.create({ name, email, phone });
+};
+
+const removeTask = (id) => {
+  return contacts.findByIdAndRemove({ _id: id });
+};
+
+const updateTask = (id, fields) => {
+  return contacts.findByIdAndUpdate({ _id: id }, fields);
+};
+
 module.exports = {
   getAlltasks,
   getTaskById,
+  createTask,
+  removeTask,
+  updateTask
 };
