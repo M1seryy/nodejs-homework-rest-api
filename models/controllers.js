@@ -105,10 +105,37 @@ const updateStatus = async (req, res, next) => {
   }
 };
 
+const addToFav = async (req, res, next) => {
+  const { contactId } = req.params;
+  const { favorite = true } = req.body;
+
+  try {
+    const result = await service.addFav(contactId, { favorite });
+    if (result) {
+      res.json({
+        status: "success",
+        code: 200,
+        data: { contacts: result },
+      });
+    } else {
+      res.status(404).json({
+        status: "error",
+        code: 404,
+        message: `Not found task id: ${contactId}`,
+        data: "Not Found",
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 module.exports = {
   get,
   getById,
   create,
   remove,
   updateStatus,
+  addToFav,
 };

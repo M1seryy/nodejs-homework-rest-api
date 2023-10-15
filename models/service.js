@@ -22,10 +22,15 @@ const updateTask = (id, fields) => {
   return contacts.findByIdAndUpdate({ _id: id }, fields);
 };
 
+const addFav = (id, fields) => {
+  return contacts.findByIdAndUpdate({ _id: id }, fields);
+};
+
 module.exports = {
   getAlltasks,
   getTaskById,
   createTask,
   removeTask,
+  addFav,
   updateTask
 };
