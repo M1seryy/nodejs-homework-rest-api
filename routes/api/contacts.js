@@ -1,66 +1,16 @@
 const express = require("express");
-const {
-  listContacts,
-  getContactById,
-  addContact,
-  removeContact,
-  updateContact,
-} = require("../../models/contacts");
+
+const controller = require("../../controllers/contactController.js");
 
 const router = express.Router();
-router.get("/", async (req, res, next) => {
-  listContacts()
-    .then((data) => res.json({ data: JSON.parse(data) }))
-    .catch((err) => console.log(err));
-});
+router.get("/", controller.getContact);
 
-router.get("/:contactId", async (req, res) => {
-  const { contactId } = req.params;
-  const response = await getContactById(contactId);
-  res.status(200).json({
-    data: response,
-  });
-});
+router.get("/:contactId", controller.getById);
 
-router.post("/", async (req, res, next) => {
-  const { name, phone, email } = req.body;
-  const newContact = await addContact({ name, phone, email });
-  if (!name || !email || !phone) {
-    return res.status(400).json({
-      message: "Fields error",
-    });
-  } else {
-    res.status(200).json({
-      data: newContact,
-    });
-  }
-});
+router.post("/", controller.createContact);
 
-router.delete("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  await removeContact(contactId);
-  const result = await removeContact(contactId);
-  res.status(204).json({
-    data: result,
-  });
-});
+router.delete("/:contactId", controller.deleteContact);
 
-router.put("/:contactId", async (req, res, next) => {
-  const { name, phone, email } = req.body;
-  const { contactId } = req.params;
-  console.log("req.body", req.body);
-  console.log("contactId", contactId);
-  if (Object.keys(req.body).length) {
-    res.json({
-      status: "success",
-      code: 200,
-      data: await updateContact(contactId, { name, phone, email }),
-    });
-  } else {
-    res.status(400).json({
-      message: "not found",
-    });
-  }
-});
+router.put("/:contactId", controller.putContact);
 
 module.exports = router;

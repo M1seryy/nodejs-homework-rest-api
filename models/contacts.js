@@ -38,7 +38,6 @@ const removeContact = async (contactId) => {
 };
 
 const addContact = async (body) => {
-  let isOk = false;
   const result = await fs
     .readFile(`${__dirname}/contacts.json`, "utf8")
     .then((data) => data)
@@ -77,6 +76,8 @@ const updateContact = async (contactId, body) => {
   fs.writeFile(`${__dirname}/contacts.json`, JSON.stringify(result));
   return contact;
 };
+
+
 
 module.exports = {
   listContacts,
