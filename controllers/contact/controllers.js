@@ -1,4 +1,4 @@
-const service = require("../models/service");
+const service = require("../../service/contacts/service");
 const get = async (req, res, next) => {
   try {
     const results = await service.getAlltasks();

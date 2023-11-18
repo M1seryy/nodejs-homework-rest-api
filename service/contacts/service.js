@@ -1,4 +1,4 @@
-const contacts = require("./contatacSchema");
+const contacts = require("../../models/contatacSchema");
 
 const getAlltasks = async () => {
   const findContacts = await contacts.find({});
