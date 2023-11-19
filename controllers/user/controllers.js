@@ -14,16 +14,12 @@ const register = async (req, res, next) => {
         email,
         password: hashedPass,
       });
-      res.json({
-        status: "Created",
-        code: 201,
-        data: {
-          user: response,
-        },
+      res.status(201).json({
+        email: response.email,
+        password: response.password,
       });
     } else {
-      res.json({
-        status: 409,
+      res.status(409).json({
         message: "Email in use",
       });
     }
@@ -40,26 +36,32 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const user = await scheme.findOne({ email });
-    if (user === null) {
-      return res.status(401).send({ message: "Email or password is wrong" });
-    }
-    const isValidPass = await crypt.compare(password, user.password);
-    if (!isValidPass) {
-      return res.json({
-        status: 401,
-        message: "Email or password is wrong",
-      });
-    }
-    const token = jwt.sign(
-      { _id: user._id, email: user.email, subscription: user.subscription },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
+    if (email && password) {
+      const user = await scheme.findOne({ email });
+      if (user === null) {
+        return res.status(401).send({ message: "Email or password is wrong" });
       }
-    );
+      const isValidPass = await crypt.compare(password, user.password);
+      if (!isValidPass) {
+        return res.json({
+          status: 401,
+          message: "Email or password is wrong",
+        });
+      }
+      const token = jwt.sign(
+        { _id: user._id, email: user.email, subscription: user.subscription },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
 
-    res.send({ token });
+      res.send({ user, token });
+    }
+    return res.json({
+      status: 401,
+      message: "Email or password is wrong",
+    });
   } catch (error) {
     console.log(error);
     next(error);
@@ -68,7 +70,7 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const user = scheme.findByIdAndUpdate(req.user._id, { token: null });
+    await scheme.findByIdAndUpdate(req.user._id, { token: null });
     res.status(204).end();
   } catch (error) {
     console.log(error);
