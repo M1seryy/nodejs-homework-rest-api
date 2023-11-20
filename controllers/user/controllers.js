@@ -3,24 +3,30 @@ const crypt = require("bcrypt");
 const scheme = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
 const register = async (req, res, next) => {
+  const { email, password } = req.body;
   try {
-    const { email, password } = req.body;
-    const salt = await crypt.genSalt();
-    const hashedPass = await crypt.hash(password, salt);
-    const emailVerify = await scheme.findOne({ email });
+    if (email) {
+      const salt = await crypt.genSalt();
+      const hashedPass = await crypt.hash(password, salt);
+      const emailVerify = await scheme.findOne({ email });
 
-    if (!emailVerify) {
-      const response = await service.createUser({
-        email,
-        password: hashedPass,
-      });
-      res.status(201).json({
-        email: response.email,
-        password: response.password,
-      });
+      if (!emailVerify) {
+        const response = await service.createUser({
+          email,
+          password: hashedPass,
+        });
+        res.status(201).json({
+          email: response.email,
+          password: response.password,
+        });
+      } else {
+        res.status(409).json({
+          message: "Email in use",
+        });
+      }
     } else {
-      res.status(409).json({
-        message: "Email in use",
+      res.status(400).json({
+        message: "No email",
       });
     }
   } catch (error) {

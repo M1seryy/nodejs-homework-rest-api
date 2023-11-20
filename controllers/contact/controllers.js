@@ -41,13 +41,19 @@ const getById = async (req, res, next) => {
 const create = async (req, res, next) => {
   const { name, email, phone } = req.body;
   try {
-    const result = await service.createTask({ name, email, phone });
+    if (name && email && phone) {
+      const result = await service.createTask({ name, email, phone });
 
-    res.status(201).json({
-      status: "success",
-      code: 201,
-      data: { contacts: result },
-    });
+      res.status(201).json({
+        status: "success",
+        code: 201,
+        data: { contacts: result },
+      });
+    } else {
+      res.status(400).json({
+        message: "Validation eroor",
+      });
+    }
   } catch (e) {
     console.error(e);
     next(e);
