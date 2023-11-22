@@ -1,6 +1,9 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs").promises;
 
 const contactsRouter = require("./routes/api/contacts");
 const userRouter = require("./routes/api/users");
@@ -17,6 +20,25 @@ require("dotenv").config();
 app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
+
+const uploadDir = path.join(process.cwd(), "uploads");
+const storeImage = path.join(process.cwd(), "images");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+  limits: {
+    fileSize: 1048576,
+  },
+});
+
+const upload = multer({
+  storage: storage,
+});
 
 app.use("/api/contacts", isAuth, contactsRouter);
 app.use("/api/users", userRouter);
