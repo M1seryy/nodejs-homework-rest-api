@@ -16,6 +16,10 @@ const user = new Schema({
     default: "starter",
   },
   token: String,
+  avatar: {
+    type: String,
+    default: null,
+  },
 });
 const User = model("user", user);
 
