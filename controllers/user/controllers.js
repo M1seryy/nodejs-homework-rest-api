@@ -2,6 +2,13 @@ const service = require("../../service/users/service");
 const crypt = require("bcrypt");
 const scheme = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
+const Jimp = require("jimp");
+const UserScheme = require("../../models/userModel");
+
+const path = require("path");
+const fs = require("fs").promises;
+const multer = require("multer");
+
 const register = async (req, res, next) => {
   const { email, password } = req.body;
   try {
@@ -92,9 +99,46 @@ const current = async (req, res, next) => {
   res.send(data);
 };
 
+const patchImg = async (req, res, next) => {
+  const uploadDir = path.join(__dirname, "../../public/avatars/");
+  try {
+    if (req.file) {
+      Jimp.read(req.file.path, async function (err, image) {
+        if (err) throw err;
+        image
+          .resize(250, 250)
+          .quality(50)
+          .write(uploadDir + req.file.originalname);
+        await fs.rename(req.file.path, uploadDir + req.file.originalname);
+
+        const result = await UserScheme.findByIdAndUpdate(
+          req.user._id,
+          { avatar: req.file.originalname },
+          { new: true }
+        ).exec();
+        if (result === null) {
+          res.status(404).send({
+            message: "User not found",
+          });
+        }
+        res.send(result);
+      });
+    } else {
+      return res.json({
+        status: 404,
+        message: "Picture not found",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return next(err);
+  }
+};
+
 module.exports = {
   current,
   register,
   login,
   logout,
+  patchImg,
 };
