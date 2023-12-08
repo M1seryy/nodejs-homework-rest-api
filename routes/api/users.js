@@ -9,7 +9,8 @@ router.post("/register", controller.register);
 router.post("/login", controller.login);
 router.get("/current", isAuth, controller.current);
 router.post("/logout", isAuth, controller.logout);
-router.get("/verify/:verifyToken",controller.verify);
+router.get("/verify/:verifyToken", controller.verify);
 router.patch("/uploads", isAuth, upload.single("picture"), controller.patchImg);
+router.post("/verify", controller.reVerify);
 
 module.exports = router;

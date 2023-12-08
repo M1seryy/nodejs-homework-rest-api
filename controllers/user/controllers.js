@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Jimp = require("jimp");
 const UserScheme = require("../../models/userModel");
 const crypto = require("node:crypto");
+require("dotenv").config();
 
 const path = require("path");
 const fs = require("fs").promises;
@@ -25,8 +26,8 @@ const register = async (req, res, next) => {
         await sendEmailHelper({
           to: email,
           subject: "Verification email sent",
-          html: `Reg confirm <a href=http://localhost:3001/api/users/verify/${verificationToken}>Link</a>`,
-          text: `Reg confirm http://localhost:3001/api/users/verify/${verificationToken}`,
+          html: `Reg confirm <a href=${process.env.LINK}/${verificationToken}>Link</a>`,
+          text: `Reg confirm ${process.env.LINK}/${verificationToken}`,
         });
 
         const response = await service.createUser({
@@ -158,6 +159,7 @@ const patchImg = async (req, res, next) => {
 
 const verify = async (req, res, next) => {
   const { verifyToken } = req.params;
+  
   try {
     const user = await UserScheme.findOne({
       verificationToken: verifyToken,
@@ -177,6 +179,37 @@ const verify = async (req, res, next) => {
   }
 };
 
+const reVerify = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).send({ message: "missing required field email" });
+    }
+    const user = await UserScheme.findOne({
+      email,
+    }).exec();
+    if (user.verify !== true) {
+      const verificationToken = crypto.randomUUID();
+
+      console.log(process.env.LINK);
+      await sendEmailHelper({
+        to: email,
+        subject: "Verification email sent",
+        html: `Reg confirm <a href=${process.env.LINK}/${verificationToken}>Link</a>`,
+        text: `Reg confirm ${process.env.LINK}/${verificationToken}`,
+      });
+
+      return res.status(200).send({ message: "Confirm your email" });
+    }
+    return res
+      .status(404)
+      .send({ message: "Verification has already been passed" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 module.exports = {
   current,
   register,
@@ -184,4 +217,5 @@ module.exports = {
   logout,
   patchImg,
   verify,
+  reVerify,
 };
