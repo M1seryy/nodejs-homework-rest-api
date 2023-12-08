@@ -4,10 +4,12 @@ const scheme = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
 const Jimp = require("jimp");
 const UserScheme = require("../../models/userModel");
+const crypto = require("node:crypto");
 
 const path = require("path");
 const fs = require("fs").promises;
 const multer = require("multer");
+const sendEmailHelper = require("../../helpers/sendEmail");
 
 const register = async (req, res, next) => {
   const { email, password } = req.body;
@@ -18,9 +20,19 @@ const register = async (req, res, next) => {
       const emailVerify = await scheme.findOne({ email });
 
       if (!emailVerify) {
+        const verificationToken = crypto.randomUUID();
+
+        await sendEmailHelper({
+          to: email,
+          subject: "Verification email sent",
+          html: `Reg confirm <a href=http://localhost:3001/api/users/verify/${verificationToken}>Link</a>`,
+          text: `Reg confirm http://localhost:3001/api/users/verify/${verificationToken}`,
+        });
+
         const response = await service.createUser({
           email,
           password: hashedPass,
+          verificationToken,
         });
         res.status(201).json({
           email: response.email,
@@ -54,13 +66,22 @@ const login = async (req, res, next) => {
       if (user === null) {
         return res.status(401).send({ message: "Email or password is wrong" });
       }
+
       const isValidPass = await crypt.compare(password, user.password);
+
       if (!isValidPass) {
         return res.json({
           status: 401,
           message: "Email or password is wrong",
         });
       }
+
+      if (user.verify === false) {
+        return res
+          .status(401)
+          .send({ message: "Your accaunt is not verified" });
+      }
+
       const token = jwt.sign(
         { _id: user._id, email: user.email, subscription: user.subscription },
         process.env.JWT_SECRET,
@@ -135,10 +156,32 @@ const patchImg = async (req, res, next) => {
   }
 };
 
+const verify = async (req, res, next) => {
+  const { verifyToken } = req.params;
+  try {
+    const user = await UserScheme.findOne({
+      verificationToken: verifyToken,
+    }).exec();
+    if (user === null) {
+      return res.status(404).send({ message: "Not found" });
+    }
+
+    await UserScheme.findByIdAndUpdate(user._id, {
+      verificationToken: null,
+      verify: true,
+    });
+    return res.send({ message: "Email confirmed" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 module.exports = {
   current,
   register,
   login,
   logout,
   patchImg,
+  verify,
 };

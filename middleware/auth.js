@@ -11,6 +11,12 @@ const isAuth = async (req, res, next) => {
       if (err) {
         return res.send({ message: "Not authorized" });
       }
+
+      if (user.verify !== true) {
+        return res
+          .status(401)
+          .send({ message: "Your account is not verified" });
+      }
       req.user = decoded;
       next();
     });
